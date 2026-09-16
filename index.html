@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>코잡스 친바</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Do+Hyeon&family=IBM+Plex+Mono:wght@500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --ground:#F3F4EF; --surface:#FFFFFF; --sunk:#ECEEE7; --ink:#1B2320; --muted:#5F6964; --line:#D9DDD3;
+  --accent:#C8443A; --accent-soft:#FBE7E2;
+  --ok:#1D8A4C; --ok-bg:#E3F3E8; --rec:#0B6B36; --rec-bg:#BFE6CC;
+  --no:#8A4634; --no-bg:#EBDFD8; --warn:#9A6A00; --warn-bg:#FBF0CF;
+  --g1:#E0913A; --g2:#3B8FD9; --g3:#8A5BD1; --g4:#2BA37A; --g5:#D1487A; --g6:#7C8580;
+  --shadow:0 1px 0 rgba(20,30,25,.04),0 6px 18px -10px rgba(20,30,25,.25);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#141816; --surface:#1C211F; --sunk:#232926; --ink:#E7ECE8; --muted:#9BA59F; --line:#323A36;
+  --accent:#FF9A8B; --accent-soft:#45261F;
+  --ok:#6ED39A; --ok-bg:#1B3325; --rec:#A6F0C4; --rec-bg:#22553A;
+  --no:#C98063; --no-bg:#33251C; --warn:#F2C45A; --warn-bg:#3A3018;
+  --shadow:0 1px 0 rgba(0,0,0,.2),0 8px 20px -12px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --ground:#141816; --surface:#1C211F; --sunk:#232926; --ink:#E7ECE8; --muted:#9BA59F; --line:#323A36;
+  --accent:#FF9A8B; --accent-soft:#45261F;
+  --ok:#6ED39A; --ok-bg:#1B3325; --rec:#A6F0C4; --rec-bg:#22553A;
+  --no:#C98063; --no-bg:#33251C; --warn:#F2C45A; --warn-bg:#3A3018;
+  --shadow:0 1px 0 rgba(0,0,0,.2),0 8px 20px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:14px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{font-family:"Do Hyeon","IBM Plex Sans KR",sans-serif;font-weight:400;font-size:34px;line-height:1;margin:0;letter-spacing:.01em}
+h1 small{display:block;font-family:"IBM Plex Sans KR",sans-serif;font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:0}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+button,select,input,textarea{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--rec)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+h2{font-size:17px;margin:0 0 4px}
+p.help{color:var(--muted);margin:0 0 12px;max-width:62ch}
+textarea{width:100%;min-height:180px;border:1px solid var(--line);background:var(--sunk);border-radius:8px;padding:10px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.field input,.field select{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:6px 8px;font-weight:500;color:var(--ink);min-width:0}
+.field input[type=number]{width:90px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--sunk);color:var(--muted)}
+.tag.example{background:var(--warn-bg);color:var(--warn);font-weight:600}
+.tablewrap{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--sunk);font-size:12px;color:var(--muted);z-index:1}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+.gdot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.slotlist{display:flex;flex-wrap:wrap;gap:6px}
+.slotlist .tag b{color:var(--ink);font-variant-numeric:tabular-nums}
+.msg{font-size:13px;padding:8px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn)}
+.msg.good{background:var(--ok-bg);color:var(--rec)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 12px;display:flex;gap:8px;align-items:baseline}
+.stat b{font-size:18px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.bad b{color:var(--no)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin:0 0 12px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+.hint{background:var(--accent-soft);color:var(--ink);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;align-items:start}
+.team{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;transition:background .15s,border-color .15s}
+.team .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.team .tname{font-family:"Do Hyeon",sans-serif;font-size:20px;line-height:1}
+.team select{border:1px solid var(--line);background:var(--sunk);border-radius:6px;padding:4px 6px;font-size:12px;max-width:190px}
+.team .gradebar{display:flex;gap:3px;height:6px;border-radius:3px;overflow:hidden;background:var(--sunk)}
+.team .gradebar span{height:100%}
+.team .sub{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.chips{display:flex;flex-direction:column;gap:4px}
+.chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 4px 0 0;min-height:32px}
+.chip .pick{flex:1;display:flex;align-items:center;gap:8px;border:0;background:transparent;text-align:left;padding:5px 8px;cursor:default;min-width:0;border-radius:8px}
+.editing .chip .pick{cursor:pointer}
+.chip .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .gr{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.chip.eb{background:var(--sunk)}
+.chip.eb .nm::after{content:"E-board";font-size:10px;font-weight:700;margin-left:6px;padding:1px 5px;border-radius:4px;background:var(--ink);color:var(--surface);vertical-align:1px}
+.chip.clash{border-color:var(--no);background:var(--no-bg)}
+.chip.clash .gr::before{content:"시간 X · ";color:var(--no);font-weight:700}
+.chip.sel{outline:2.5px solid var(--accent);outline-offset:1px}
+.chip .swap{border:1px solid var(--ok);background:var(--ok-bg);color:var(--rec);border-radius:6px;font-size:12px;font-weight:700;padding:2px 8px;cursor:pointer}
+.chip .swap.rec{background:var(--rec);color:var(--surface);border-color:var(--rec)}
+.empty{font-size:12px;color:var(--muted);padding:6px 8px;border:1px dashed var(--line);border-radius:8px}
+.move{display:none;border:1.5px dashed currentColor;background:transparent;border-radius:8px;padding:6px;font-weight:700;cursor:pointer}
+.team.t-rec{background:var(--rec-bg);border-color:var(--rec)}
+.team.t-ok{background:var(--ok-bg);border-color:var(--ok)}
+.team.t-warn{background:var(--warn-bg);border-color:var(--warn)}
+.team.t-no{opacity:.55}
+.team.t-rec .move{display:block;color:var(--rec)}
+.team.t-ok .move{display:block;color:var(--ok)}
+.team.t-warn .move{display:block;color:var(--warn)}
+.team.t-cur{border-color:var(--accent)}
+.team.pool{background:var(--sunk);border-style:dashed}
+.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--rec);color:var(--surface)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:9px 16px;border-radius:8px;font-weight:600;font-size:13px;z-index:10}
+@media (prefers-reduced-motion:reduce){.team{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>코잡스 친바<small>구글 폼 응답으로 시간이 맞고 학년이 섞인 조를 짜고, 손으로 고치고, 엑셀로 내보내기</small></h1>
+    <div class="tabs" role="tablist">
+      <button id="tab-data" role="tab" aria-selected="true">1 · 응답 불러오기</button>
+      <button id="tab-board" role="tab" aria-selected="false">2 · 조 편성</button>
+    </div>
+  </header>
+
+  <section id="view-data" class="grid2">
+    <div class="panel stack">
+      <div>
+        <h2>응답 붙여넣기</h2>
+        <p class="help">Google Sheets 응답 시트에서 전체 선택 후 복사해서 붙여넣거나, 파일 › 다운로드 › CSV를 올려주세요. 체크박스 그리드 열(<code>질문 [오전 …]</code>)은 자동으로 인식합니다.</p>
+      </div>
+      <div class="row"><span id="exampleTag" class="tag example">예시 데이터가 들어있어요</span>
+        <label class="btn" for="file">CSV 파일 열기</label><input id="file" type="file" accept=".csv,.tsv,.txt" hidden>
+        <button class="btn" id="clearBtn">비우기</button></div>
+      <textarea id="raw" spellcheck="false" aria-label="응답 데이터"></textarea>
+      <div class="row">
+        <label class="field">이름 열<select id="colName"></select></label>
+        <label class="field">학년 열<select id="colGrade"></select></label>
+      </div>
+      <div class="row">
+        <label class="field">팀 총 인원 (E-board 포함)<input id="teamSize" type="number" min="3" max="12" value="5"></label>
+        <label class="field">E-board 1명당 최대 팀<input id="ebMax" type="number" min="1" max="10" value="1"></label>
+        <label class="field">시도 횟수<input id="iters" type="number" min="20" max="5000" step="50" value="600"></label>
+      </div>
+      <div id="parseMsg" class="msg" hidden></div>
+    </div>
+    <div class="panel stack">
+      <div>
+        <h2>명단 <span id="rosterCount" class="tag"></span></h2>
+        <p class="help">E-board에 체크하세요. 체크한 사람은 조마다 1명씩 들어가고, 이 브라우저에 기억됩니다.</p>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>E-board</th><th>이름</th><th>학년</th><th class="num">가능 슬롯</th></tr></thead><tbody id="roster"></tbody></table></div>
+      <div><p class="label">인식된 시간 슬롯 · 가능 인원</p><div id="slots" class="slotlist"></div></div>
+      <button class="btn primary" id="goBtn">랜덤 배정하고 조 편성으로 →</button>
+    </div>
+  </section>
+
+  <section id="view-board" hidden>
+    <div class="toolbar">
+      <div class="stats" id="stats"></div>
+      <div class="row">
+        <button class="btn primary" id="shuffleBtn">랜덤 배정</button>
+        <button class="btn" id="editBtn" aria-pressed="false">편집 모드</button>
+        <button class="btn" id="xlsxBtn">엑셀로 내보내기</button>
+        <button class="btn" id="copyBtn">시트용 복사</button>
+      </div>
+    </div>
+    <div id="hint" class="hint" hidden></div>
+    <div class="legend" id="legend" hidden>
+      <span><i style="background:var(--rec-bg);border-color:var(--rec)"></i>추천 · 시간 가능하고 그 학년이 아직 없음</span>
+      <span><i style="background:var(--ok-bg);border-color:var(--ok)"></i>가능 · 시간은 되지만 학년 겹침</span>
+      <span><i style="background:var(--warn-bg);border-color:var(--warn)"></i>E-board 교환 시 상대가 시간 X</span>
+      <span><i style="opacity:.5"></i>불가 · 시간 안 됨</span>
+      <span><b style="color:var(--rec)">⇄</b> 서로 시간 맞는 맞교환</span>
+    </div>
+    <div id="teams" class="teams"></div>
+  </section>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const GRADE_ORDER=['1학년','2학년','3학년','4학년','척척석사'];
+const store={get(k,d){try{const v=localStorage.getItem('chinba:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('chinba:'+k,JSON.stringify(v))}catch(e){}}};
+
+let people=[],slots=[],teams=[],editing=false,sel=null,isExample=false;
+let headers=[],rows=[];
+let ebNames=new Set(store.get('eb',[]));
+
+/* ---------- example data ---------- */
+function exampleCSV(){
+  let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const fam='김이박최정강조윤장임한오서신권황안송류홍'.split('');
+  const giv=['민준','서연','지호','하은','도윤','수아','예준','지우','시우','서윤','주원','하린','준서','채원','건우','유나','현우','소율','지훈','다은','우진','윤서','선우','예린','연우','수빈','정우','가은','승현','나연','태윤','지민','은호','서진'];
+  const dates=['9월 26일','9월 27일','9월 30일','10월 1일','10월 3일','10월 4일','10월 14일','10월 15일','10월 17일','10월 18일','10월 21일','10월 22일'];
+  const q='가능한 일정 *모두* 체크해 주세요.';
+  const H=['타임스탬프','한국 이름','학년',`${q} [오전 11:30]`,`${q} [오후 4:30]`];
+  const out=[H.map(csvq).join(',')];
+  const eb=[];
+  for(let i=0;i<34;i++){
+    const name=fam[Math.floor(r()*fam.length)]+giv[i];
+    const g=GRADE_ORDER[[0,0,0,1,1,1,2,2,3,4][Math.floor(r()*10)]];
+    const pick=()=>dates.filter(()=>r()<0.38).join(', ');
+    out.push(['2026/09/1'+(i%9)+' 10:0'+(i%10),name,g,pick(),pick()].map(csvq).join(','));
+    if(i%5===0)eb.push(name);
+  }
+  return {csv:out.join('\n'),eb};
+}
+function csvq(s){s=String(s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+
+/* ---------- parsing ---------- */
+function parseDelimited(text){
+  const delim=(text.split('\n')[0]||'').includes('\t')?'\t':',';
+  const out=[];let row=[],f='',q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++} else q=false } else f+=c; }
+    else if(c==='"'&&f==='')q=true;
+    else if(c===delim){row.push(f);f=''}
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n')i++; row.push(f);f=''; if(row.some(x=>x.trim()!==''))out.push(row); row=[] }
+    else f+=c;
+  }
+  row.push(f); if(row.some(x=>x.trim()!==''))out.push(row);
+  return out;
+}
+function load(text,keepCols){
+  const t=parseDelimited(text.trim());
+  headers=(t[0]||[]).map(h=>h.trim()); rows=t.slice(1);
+  const nameSel=$('#colName'),gradeSel=$('#colGrade');
+  const prevN=nameSel.value,prevG=gradeSel.value;
+  const opts=headers.map((h,i)=>`<option value="${i}">${esc(h.length>40?h.slice(0,40)+'…':h)||'(열 '+(i+1)+')'}</option>`).join('');
+  nameSel.innerHTML=opts;gradeSel.innerHTML=opts;
+  const find=(fn)=>headers.findIndex(fn);
+  let ni=find(h=>h.includes('한국')&&h.includes('이름')); if(ni<0)ni=find(h=>/이름|name/i.test(h));
+  let gi=find(h=>h.includes('학년')&&!h.includes('['));
+  if(keepCols&&prevN!==''&&+prevN<headers.length){ni=+prevN;gi=+prevG}
+  nameSel.value=Math.max(ni,0); gradeSel.value=Math.max(gi,0);
+  build();
+}
+function build(){
+  const ni=+$('#colName').value,gi=+$('#colGrade').value;
+  const gridCols=[];
+  headers.forEach((h,i)=>{const m=h.match(/\[([^\]]+)\]\s*$/);if(m)gridCols.push({i,row:m[1].trim()})});
+  const slotMap=new Map();slots=[];
+  const byName=new Map();let dup=0;
+  rows.forEach(r=>{
+    const name=(r[ni]||'').trim(); if(!name)return;
+    const avail=new Set();
+    gridCols.forEach(({i,row})=>{
+      (r[i]||'').split(/\s*[;,]\s*/).map(s=>s.trim()).filter(Boolean).forEach(col=>{
+        const id=col+' '+row;
+        if(!slotMap.has(id)){const s={id,col,row};slotMap.set(id,s);slots.push(s)}
+        avail.add(id);
+      });
+    });
+    if(byName.has(name))dup++;
+    byName.set(name,{id:name,name,grade:(r[gi]||'').trim()||'미기재',avail,eboard:ebNames.has(name)});
+  });
+  people=[...byName.values()];
+  const rowOrder=[...new Set(gridCols.map(g=>g.row))];
+  slots.sort((a,b)=>dateKey(a.col)-dateKey(b.col)||rowOrder.indexOf(a.row)-rowOrder.indexOf(b.row));
+  const msg=$('#parseMsg');
+  const problems=[];
+  if(!gridCols.length)problems.push('체크박스 그리드 열을 못 찾았어요. 헤더가 "질문 [시간]" 형태인지 확인하세요.');
+  if(dup)problems.push(`같은 이름으로 ${dup}건 중복 제출이 있어서 마지막 응답만 썼어요.`);
+  if(!people.some(p=>p.eboard)&&people.length)problems.push('E-board가 한 명도 체크되지 않았어요. E-board 없이 조를 짭니다.');
+  msg.hidden=!problems.length&&!people.length;
+  msg.className='msg'+(problems.length?'':' good');
+  msg.textContent=problems.length?problems.join(' '):`${people.length}명, 슬롯 ${slots.length}개 인식됨`;
+  renderRoster();
+  store.set('cols',{ni,gi});
+}
+function dateKey(s){const m=s.match(/(\d+)\s*월\s*(\d+)/);return m?(+m[1])*100+(+m[2]):9999}
+function gradeIdx(g){const i=GRADE_ORDER.indexOf(g);return i<0?5:i}
+function gcolor(g){return `var(--g${gradeIdx(g)+1})`}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function slotLabel(id){return id||'시간 미정'}
+
+function renderRoster(){
+  const sorted=[...people].sort((a,b)=>(b.eboard-a.eboard)||gradeIdx(a.grade)-gradeIdx(b.grade)||a.name.localeCompare(b.name,'ko'));
+  $('#roster').innerHTML=sorted.map(p=>`<tr><td><input type="checkbox" id="eb-${esc(p.id)}" data-eb="${esc(p.id)}" ${p.eboard?'checked':''} aria-label="${esc(p.name)} E-board"></td><td>${esc(p.name)}</td><td><span class="gdot" style="background:${gcolor(p.grade)}"></span> ${esc(p.grade)}</td><td class="num">${p.avail.size}</td></tr>`).join('');
+  const ebc=people.filter(p=>p.eboard).length;
+  $('#rosterCount').textContent=`${people.length}명 · E-board ${ebc}`;
+  const M=people.filter(p=>!p.eboard);
+  $('#slots').innerHTML=slots.map(s=>`<span class="tag">${esc(s.id)} <b>${M.filter(p=>p.avail.has(s.id)).length}</b></span>`).join('')||'<span class="tag">없음</span>';
+}
+
+/* ---------- solver ---------- */
+const S=()=>Math.max(2,(+$('#teamSize').value||5)-(people.some(p=>p.eboard)?1:0));
+function dupCost(ids){const c={};let d=0;ids.forEach(id=>{const g=P(id).grade;d+=(c[g]||0);c[g]=(c[g]||0)+1});return d}
+let pIndex=new Map();const P=id=>pIndex.get(id);
+function solve(){
+  pIndex=new Map(people.map(p=>[p.id,p]));
+  const size=S(),ebMax=Math.max(1,+$('#ebMax').value||1),iters=Math.max(20,+$('#iters').value||600);
+  const E=people.filter(p=>p.eboard),M=people.filter(p=>!p.eboard);
+  let T=Math.max(1,Math.ceil(M.length/size));
+  if(E.length)T=Math.min(T,E.length*ebMax);
+  if(!M.length||!slots.length){teams=[];return}
+  const demand={};slots.forEach(s=>demand[s.id]=M.filter(p=>p.avail.has(s.id)).length);
+  let best=null,bestScore=Infinity;
+  for(let it=0;it<iters;it++){
+    const ts=[],use=new Map(E.map(e=>[e.id,[]])),atSlot={};
+    for(let t=0;t<T;t++){
+      let cands=[];
+      if(E.length){
+        const minU=Math.min(...E.map(e=>use.get(e.id).length));
+        E.forEach(e=>{const u=use.get(e.id);if(u.length>=ebMax||u.length>minU)return;
+          e.avail.forEach(s=>{if(!u.includes(s)&&demand[s]!=null)cands.push({e:e.id,s})})});
+        if(!cands.length)E.forEach(e=>{const u=use.get(e.id);if(u.length>=ebMax)return;e.avail.forEach(s=>{if(!u.includes(s)&&demand[s]!=null)cands.push({e:e.id,s})})});
+      }else slots.forEach(s=>cands.push({e:null,s:s.id}));
+      if(!cands.length)break;
+      let pick=null,pw=-1;
+      cands.forEach(c=>{const left=demand[c.s]-(atSlot[c.s]||0)*size;const w=Math.pow(Math.max(.3,left),2)*Math.random();if(w>pw){pw=w;pick=c}});
+      ts.push({slot:pick.s,eboard:pick.e,members:[]});
+      atSlot[pick.s]=(atSlot[pick.s]||0)+1; if(pick.e)use.get(pick.e).push(pick.s);
+    }
+    const n=ts.length; if(!n)continue;
+    const cap=ts.map(()=>size);
+    const order=M.map(p=>({p,k:ts.filter(t=>p.avail.has(t.slot)).length+Math.random()*.9})).sort((a,b)=>a.k-b.k).map(x=>x.p);
+    const pool=[];
+    order.forEach(p=>{
+      let bi=-1,bc=Infinity;
+      ts.forEach((t,i)=>{if(t.members.length>=cap[i]||!p.avail.has(t.slot))return;
+        const same=t.members.filter(id=>P(id).grade===p.grade).length;
+        const c=same*10+t.members.length/size+Math.random()*.6; if(c<bc){bc=c;bi=i}});
+      if(bi<0)pool.push(p.id);else ts[bi].members.push(p.id);
+    });
+    // repair: push someone out to make room
+    for(let pass=0;pass<2;pass++)for(let k=pool.length-1;k>=0;k--){
+      const p=P(pool[k]);let done=false;
+      for(let i=0;i<n&&!done;i++){const t=ts[i];if(!p.avail.has(t.slot))continue;
+        if(t.members.length<cap[i]){t.members.push(p.id);done=true;break}
+        for(const q of t.members){for(let j=0;j<n;j++){if(j===i)continue;const t2=ts[j];
+          if(t2.members.length<cap[j]&&P(q).avail.has(t2.slot)){t.members.splice(t.members.indexOf(q),1);t2.members.push(q);t.members.push(p.id);done=true;break}}if(done)break}}
+      if(done)pool.splice(k,1);
+    }
+    // grade-mixing swaps
+    for(let s=0;s<n*40;s++){
+      const i=Math.floor(Math.random()*n),j=Math.floor(Math.random()*n);if(i===j)continue;
+      const a=ts[i],b=ts[j];if(!a.members.length||!b.members.length)continue;
+      const x=a.members[Math.floor(Math.random()*a.members.length)],y=b.members[Math.floor(Math.random()*b.members.length)];
+      if(P(x).grade===P(y).grade||!P(x).avail.has(b.slot)||!P(y).avail.has(a.slot))continue;
+      const before=dupCost(a.members)+dupCost(b.members);
+      const na=a.members.map(v=>v===x?y:v),nb=b.members.map(v=>v===y?x:v);
+      if(dupCost(na)+dupCost(nb)<before){a.members=na;b.members=nb}
+    }
+    const dups=ts.reduce((s,t)=>s+dupCost(t.members),0);
+    const sizes=ts.map(t=>t.members.length),mean=sizes.reduce((a,b)=>a+b,0)/n;
+    const spread=sizes.reduce((s,v)=>s+(v-mean)**2,0);
+    const small=ts.filter(t=>t.members.length<size-1).length;
+    const score=pool.length*1000+small*200+dups*10+spread;
+    if(score<bestScore){bestScore=score;best=ts.map(t=>({...t,members:[...t.members]}))}
+  }
+  teams=best||[];
+  teams.forEach(t=>t.members.sort((a,b)=>gradeIdx(P(a).grade)-gradeIdx(P(b).grade)));
+}
+function poolIds(){const inT=new Set();teams.forEach(t=>t.members.forEach(m=>inT.add(m)));return people.filter(p=>!p.eboard&&!inT.has(p.id)).map(p=>p.id)}
+function idleEboards(){const used=new Set(teams.map(t=>t.eboard));return people.filter(p=>p.eboard&&!used.has(p.id)).map(p=>p.id)}
+
+/* ---------- board render ---------- */
+function status(ti){ // ti: team index or -1 pool
+  if(!sel||!editing)return '';
+  const p=P(sel.id);
+  if(ti===sel.team)return 't-cur';
+  if(ti===-1)return p.eboard?'':'t-ok';
+  const t=teams[ti];
+  if(p.eboard){
+    if(!p.avail.has(t.slot))return 't-no';
+    if(teams.some((o,k)=>k!==sel.team&&k!==ti&&o.eboard===p.id&&o.slot===t.slot))return 't-no';
+    if(sel.team>=0&&t.eboard&&!P(t.eboard).avail.has(teams[sel.team].slot))return 't-warn';
+    return 't-rec';
+  }
+  if(!p.avail.has(t.slot))return 't-no';
+  const has=t.members.some(id=>P(id).grade===p.grade);
+  return (!has&&t.members.length<S())?'t-rec':'t-ok';
+}
+function canSwap(ti,qid){
+  if(!sel||!editing)return 0;const p=P(sel.id),q=P(qid);
+  if(p.eboard||q.eboard||ti===sel.team)return 0;
+  const t=teams[ti];if(!p.avail.has(t.slot))return 0;
+  if(sel.team>=0&&!q.avail.has(teams[sel.team].slot))return 0;
+  if(sel.team<0)return 0;
+  const src=teams[sel.team];
+  const before=dupCost(src.members)+dupCost(t.members);
+  const after=dupCost(src.members.map(v=>v===p.id?q.id:v))+dupCost(t.members.map(v=>v===q.id?p.id:v));
+  return after<before?2:1;
+}
+function chip(id,ti,isEb){
+  const p=P(id);const slot=ti>=0?teams[ti].slot:null;
+  const clash=slot&&!p.avail.has(slot);
+  const isSel=sel&&sel.id===id&&sel.team===ti;
+  const sw=isEb?0:canSwap(ti,id);
+  return `<div class="chip ${isEb?'eb':''} ${clash?'clash':''} ${isSel?'sel':''}">
+    <button class="pick" data-pick="${esc(id)}" data-team="${ti}" ${editing?'':'tabindex="-1"'}><span class="gdot" style="background:${gcolor(p.grade)}"></span><span class="nm">${esc(p.name)}</span><span class="gr">${esc(p.grade)}</span></button>
+    ${sw?`<button class="swap ${sw===2?'rec':''}" data-swap="${esc(id)}" data-team="${ti}" title="${esc(P(sel.id).name)} ↔ ${esc(p.name)}">⇄</button>`:''}
+  </div>`;
+}
+function gradebar(ids){const c={};ids.forEach(id=>{const g=P(id).grade;c[g]=(c[g]||0)+1});
+  return `<div class="gradebar" title="${Object.entries(c).map(([g,n])=>g+' '+n).join(', ')}">${Object.entries(c).sort((a,b)=>gradeIdx(a[0])-gradeIdx(b[0])).map(([g,n])=>`<span style="flex:${n};background:${gcolor(g)}"></span>`).join('')}</div>`}
+function render(){
+  const size=S();
+  const box=$('#teams');box.classList.toggle('editing',editing);
+  let html=teams.map((t,i)=>{
+    const st=status(i);
+    const all=[t.eboard,...t.members].filter(Boolean);
+    const opts=slots.map(s=>{const ok=all.filter(id=>P(id).avail.has(s.id)).length;return `<option value="${esc(s.id)}" ${s.id===t.slot?'selected':''}>${ok===all.length?'● ':'   '}${esc(s.id)} (${ok}/${all.length})</option>`}).join('');
+    return `<article class="team ${st}">
+      <div class="head"><span class="tname">${i+1}조</span><span class="tag">${all.length}명</span>${st==='t-rec'?'<span class="badge">추천</span>':''}
+        <select id="slot-${i}" data-slot="${i}" aria-label="${i+1}조 시간">${opts}</select></div>
+      ${gradebar(t.members)}
+      <div class="chips">${t.eboard?chip(t.eboard,i,true):'<div class="empty">E-board 없음</div>'}
+      ${t.members.map(m=>chip(m,i,false)).join('')}${t.members.length<size?`<div class="empty">빈자리 ${size-t.members.length}</div>`:''}</div>
+      <button class="move" data-move="${i}">여기로 이동</button>
+    </article>`}).join('');
+  const pool=poolIds(),idle=idleEboards();
+  html+=`<article class="team pool ${status(-1)}"><div class="head"><span class="tname">미배정</span><span class="tag">${pool.length}명</span></div>
+    <div class="chips">${idle.map(id=>chip(id,-1,true)).join('')}${pool.map(id=>chip(id,-1,false)).join('')||'<div class="empty">모두 배정됨</div>'}</div>
+    <button class="move" data-move="-1">미배정으로 빼기</button></article>`;
+  box.innerHTML=html;
+  const clashes=teams.reduce((s,t)=>s+[t.eboard,...t.members].filter(id=>id&&!P(id).avail.has(t.slot)).length,0);
+  const dups=teams.reduce((s,t)=>s+dupCost(t.members),0);
+  const assigned=teams.reduce((s,t)=>s+t.members.length,0);
+  const over=teams.filter(t=>t.members.length>size).length;
+  $('#stats').innerHTML=[['조',teams.length],['배정',assigned],['미배정',pool.length,pool.length>0],['학년 겹침',dups],['시간 충돌',clashes,clashes>0],['정원 초과',over,over>0]]
+    .map(([l,v,bad])=>`<div class="stat ${bad?'bad':''}"><b>${v}</b><span>${l}</span></div>`).join('');
+  $('#legend').hidden=!editing;
+  const hint=$('#hint');hint.hidden=!editing;
+  hint.textContent=!sel?'이름을 누르면 옮길 수 있는 조가 초록색으로 표시돼요. 진한 초록은 그 학년이 아직 없는 추천 조예요.'
+    :`${P(sel.id).name} 선택됨. 초록 조의 "여기로 이동" 또는 ⇄ 버튼으로 맞교환. 다시 누르면 선택 해제.`;
+  saveState();
+}
+function saveState(){store.set('teams',teams.map(t=>({slot:t.slot,eboard:t.eboard,members:t.members})));}
+
+/* ---------- actions ---------- */
+function move(target){
+  const p=P(sel.id);
+  if(p.eboard){
+    if(target<0){if(sel.team>=0)teams[sel.team].eboard=null}
+    else{const t=teams[target];const other=t.eboard;t.eboard=p.id;if(sel.team>=0)teams[sel.team].eboard=other}
+  }else{
+    if(sel.team>=0){const m=teams[sel.team].members;m.splice(m.indexOf(p.id),1)}
+    if(target>=0)teams[target].members.push(p.id);
+  }
+  toast(`${p.name} → ${target<0?'미배정':(target+1)+'조'}`);sel=null;render();
+}
+function swap(qid,ti){
+  const p=P(sel.id),src=teams[sel.team],dst=teams[ti];
+  src.members[src.members.indexOf(p.id)]=qid;dst.members[dst.members.indexOf(qid)]=p.id;
+  toast(`${p.name} ⇄ ${P(qid).name}`);sel=null;render();
+}
+document.addEventListener('click',e=>{
+  const pick=e.target.closest('[data-pick]'),sw=e.target.closest('[data-swap]'),mv=e.target.closest('[data-move]');
+  if(sw){swap(sw.dataset.swap,+sw.dataset.team);return}
+  if(mv&&sel){move(+mv.dataset.move);return}
+  if(pick&&editing){const id=pick.dataset.pick,t=+pick.dataset.team;sel=(sel&&sel.id===id&&sel.team===t)?null:{id,team:t};render()}
+});
+document.addEventListener('change',e=>{
+  if(e.target.dataset.slot!=null){teams[+e.target.dataset.slot].slot=e.target.value;render()}
+  if(e.target.dataset.eb!=null){const id=e.target.dataset.eb;e.target.checked?ebNames.add(id):ebNames.delete(id);store.set('eb',[...ebNames]);const p=people.find(x=>x.id===id);if(p)p.eboard=e.target.checked;renderRoster()}
+});
+function showTab(board){$('#view-data').hidden=board;$('#view-board').hidden=!board;$('#tab-data').setAttribute('aria-selected',!board);$('#tab-board').setAttribute('aria-selected',board)}
+$('#tab-data').onclick=()=>showTab(false);
+$('#tab-board').onclick=()=>{pIndex=new Map(people.map(p=>[p.id,p]));if(!teams.length)solve();sanitize();showTab(true);render()};
+$('#goBtn').onclick=()=>{solve();sel=null;showTab(true);render();toast('랜덤 배정 완료')};
+$('#shuffleBtn').onclick=()=>{if(editing&&!confirmReset())return;solve();sel=null;render();toast('다시 배정했어요')};
+function confirmReset(){const b=$('#shuffleBtn');if(b.dataset.armed){delete b.dataset.armed;b.textContent='랜덤 배정';return true}b.dataset.armed=1;b.textContent='수정 내용 버리고 다시?';setTimeout(()=>{delete b.dataset.armed;b.textContent='랜덤 배정'},3000);return false}
+$('#editBtn').onclick=()=>{editing=!editing;sel=null;const b=$('#editBtn');b.classList.toggle('on',editing);b.setAttribute('aria-pressed',editing);b.textContent=editing?'편집 끝내기':'편집 모드';render()};
+let rawTimer;$('#raw').addEventListener('input',()=>{clearTimeout(rawTimer);rawTimer=setTimeout(()=>{isExample=false;$('#exampleTag').hidden=true;store.set('raw',$('#raw').value);teams=[];load($('#raw').value)},300)});
+['#colName','#colGrade'].forEach(s=>$(s).addEventListener('change',()=>{teams=[];build()}));
+$('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{$('#raw').value=rd.result;isExample=false;$('#exampleTag').hidden=true;store.set('raw',rd.result);teams=[];load(rd.result)};rd.readAsText(f)});
+$('#clearBtn').onclick=()=>{$('#raw').value='';store.set('raw','');$('#exampleTag').hidden=true;teams=[];load('')};
+['#teamSize','#ebMax','#iters'].forEach(s=>$(s).addEventListener('change',()=>store.set('settings2',{size:$('#teamSize').value,eb:$('#ebMax').value,it:$('#iters').value})));
+function sanitize(){const ok=new Set(people.map(p=>p.id)),sl=new Set(slots.map(s=>s.id));
+  teams=teams.filter(t=>sl.has(t.slot)).map(t=>({slot:t.slot,eboard:ok.has(t.eboard)&&P(t.eboard).eboard?t.eboard:null,members:t.members.filter(m=>ok.has(m)&&!P(m).eboard)}))}
+
+/* ---------- export ---------- */
+function tables(){
+  const size=S();const maxM=Math.max(size,...teams.map(t=>t.members.length));
+  const summary=[['조','시간','E-board',...Array.from({length:maxM},(_,i)=>'멤버'+(i+1)),'학년 구성','시간 충돌']];
+  const long=[['조','시간','역할','이름','학년','해당 시간 가능']];
+  teams.forEach((t,i)=>{
+    const c={};t.members.forEach(m=>{const g=P(m).grade;c[g]=(c[g]||0)+1});
+    const clash=[t.eboard,...t.members].filter(id=>id&&!P(id).avail.has(t.slot)).map(id=>P(id).name);
+    summary.push([`${i+1}조`,t.slot,t.eboard?P(t.eboard).name:'',...Array.from({length:maxM},(_,k)=>t.members[k]?`${P(t.members[k]).name} (${P(t.members[k]).grade})`:''),Object.entries(c).map(([g,n])=>`${g} ${n}`).join(', '),clash.join(', ')]);
+    [t.eboard,...t.members].filter(Boolean).forEach((id,k)=>long.push([`${i+1}조`,t.slot,id===t.eboard&&k===0?'E-board':'멤버',P(id).name,P(id).grade,P(id).avail.has(t.slot)?'O':'X']));
+  });
+  const pool=[['이름','학년','가능 슬롯 수','가능 슬롯']];
+  [...poolIds(),...idleEboards()].forEach(id=>{const p=P(id);pool.push([p.name+(p.eboard?' (E-board)':''),p.grade,p.avail.size,[...p.avail].join(', ')])});
+  const matrix=[['이름','학년','E-board',...slots.map(s=>s.id)]];
+  people.forEach(p=>matrix.push([p.name,p.grade,p.eboard?'O':'',...slots.map(s=>p.avail.has(s.id)?'O':'')]));
+  return {summary,long,pool,matrix};
+}
+$('#xlsxBtn').onclick=async()=>{
+  if(!window.XLSX){toast('엑셀 라이브러리를 불러오지 못했어요. "시트용 복사"를 써주세요.');return}
+  const {summary,long,pool,matrix}=tables();const wb=XLSX.utils.book_new();
+  const add=(aoa,name,w)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=aoa[0].map((_,i)=>({wch:w(i)}));XLSX.utils.book_append_sheet(wb,ws,name)};
+  add(summary,'조 요약',i=>i===1?18:i===0?6:16);add(long,'조별 명단',i=>i===1?18:10);add(pool,'미배정',i=>i===3?60:12);add(matrix,'가능 시간표',i=>i<3?10:13);
+  const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const d=new Date();const fn=`코잡스_친바_조편성_${d.getMonth()+1}월${d.getDate()}일.xlsx`;
+  let dl=null;try{dl=await window.claude?.use?.('downloads')}catch(e){}
+  if(dl){try{await dl.save({filename:fn,data:buf});toast('저장했어요')}catch(err){if(err&&err.code!=='declined')toast('저장하지 못했어요. "시트용 복사"를 써주세요.')}}
+  else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=fn;a.click();}
+};
+$('#copyBtn').onclick=async()=>{
+  const tsv=tables().summary.map(r=>r.map(c=>String(c).replace(/\t|\n/g,' ')).join('\t')).join('\n');
+  try{await navigator.clipboard.writeText(tsv);toast('복사했어요. Google Sheets에 붙여넣으세요.')}
+  catch(e){const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();toast(ok?'복사했어요':'복사가 막혀 있어요. 엑셀로 내보내기를 써주세요.')}
+};
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2200)}
+
+/* ---------- boot ---------- */
+const st=store.get('settings2',null);if(st){$('#teamSize').value=st.size;$('#ebMax').value=st.eb;$('#iters').value=st.it}
+let raw=store.get('raw','');
+if(!raw){const ex=exampleCSV();raw=ex.csv;isExample=true;if(!ebNames.size){ex.eb.forEach(n=>ebNames.add(n))}}
+$('#exampleTag').hidden=!isExample;$('#raw').value=raw;load(raw);
+const saved=store.get('teams',null);
+pIndex=new Map(people.map(p=>[p.id,p]));
+if(saved&&saved.length&&!isExample){teams=saved;sanitize()}else solve();
+showTab(true);render();
+})();
+</script>
+</body>
+</html>

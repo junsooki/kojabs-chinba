@@ -623,7 +623,13 @@ async function sharePush(){
 }
 let shareSig='';
 function shareTouch(){ // 상태가 바뀔 때마다 호출. 내용이 실제로 달라졌을 때만 저장한다
-  if(!share.on||share.applying||share.locked)return;
+  if(!share.on||share.applying)return;
+  if(share.locked){ // 확정된 달은 저장되지 않는다. 조용히 사라지지 않게 알려준다
+    if(!share.warned){share.warned=true;
+      toast('확정된 달이라 저장되지 않아요. 고치려면 확정을 해제하세요.');
+      setTimeout(()=>{share.warned=false},4000)}
+    return;
+  }
   const sig=JSON.stringify(snapshot()); if(sig===shareSig)return; shareSig=sig;
   share.dirty=true; shareStatus('변경됨…');
   clearTimeout(share.timer); share.timer=setTimeout(sharePush,1200);
@@ -695,6 +701,15 @@ async function shareBoot(){
   share.poll=setInterval(sharePollTick,5000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)sharePollTick()});
 }
+
+// 주소창에 공유 링크를 붙여넣으면 해시만 바뀌고 페이지는 다시 로드되지 않는다.
+// 워크스페이스가 달라지면 새로 부팅하고, 달만 달라지면 그 달을 불러온다.
+window.addEventListener('hashchange',()=>{
+  const h=new URLSearchParams(location.hash.slice(1));
+  const ws=h.get('ws')||'', m=h.get('m')||'';
+  if(ws!==share.ws){location.reload();return}
+  if(share.on&&m&&m!==share.period)shareLoad(m).then(shareBuildMonths);
+});
 
 /* ---------- boot ---------- */
 const st=store.get('settings3',null);if(st){$('#teamMin').value=st.min;$('#teamMax').value=st.max;$('#ebMax').value=st.eb;$('#iters').value=st.it}

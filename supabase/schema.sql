@@ -129,3 +129,4 @@ grant execute on function public.board_get(text,text)                        to 
 grant execute on function public.board_rev(text,text)                        to anon, authenticated;
 grant execute on function public.board_save(text,text,jsonb,text,bigint)     to anon, authenticated;
 grant execute on function public.board_lock(text,text,boolean)               to anon, authenticated;
+i 

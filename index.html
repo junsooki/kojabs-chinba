@@ -68,6 +68,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
 .slotlist .tag b{color:var(--ink);font-variant-numeric:tabular-nums}
 .msg{font-size:13px;padding:10px 13px;border-radius:var(--r-sm);background:var(--warn-bg);color:var(--warn)}
 .msg.good{background:var(--ok-bg);color:var(--rec)}
+.msg.period{background:var(--accent-soft);color:var(--ink);border-left:3px solid var(--accent);font-weight:600}
 
 .sharebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 13px;margin-bottom:18px;box-shadow:var(--shadow);font-size:13px}
 .sharebar .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
@@ -171,6 +172,7 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
         <label class="field">E-board 1명당 최대 팀<input id="ebMax" type="number" min="1" max="10" value="1"></label>
         <label class="field">시도 횟수<input id="iters" type="number" min="20" max="5000" step="50" value="600"></label>
       </div>
+      <div id="periodMsg" class="msg period" hidden></div>
       <div id="parseMsg" class="msg" hidden></div>
     </div>
     <div class="panel stack">
@@ -213,7 +215,7 @@ const $=s=>document.querySelector(s);
 const GRADE_ORDER=['1학년','2학년','3학년','4학년','척척석사'];
 const store={get(k,d){try{const v=localStorage.getItem('chinba:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('chinba:'+k,JSON.stringify(v))}catch(e){}}};
 
-let people=[],slots=[],teams=[],editing=false,sel=null,isExample=false;
+let people=[],slots=[],teams=[],editing=false,sel=null,isExample=false,detected=null;
 let headers=[],rows=[];
 let ebNames=new Set(store.get('eb',[]));
 
@@ -289,6 +291,11 @@ function build(){
   people=[...byName.values()];
   const rowOrder=[...new Set(gridCols.map(g=>g.row))];
   slots.sort((a,b)=>dateKey(a.col)-dateKey(b.col)||rowOrder.indexOf(a.row)-rowOrder.indexOf(b.row));
+  detected=detectPeriod();
+  const pm=$('#periodMsg');
+  pm.hidden=!slots.length;
+  pm.textContent=detected?`${detected.y}년 ${detected.mo}월 편성 · ${detected.span}`
+                         :'날짜를 못 읽어서 언제 편성인지 알 수 없어요.';
   const msg=$('#parseMsg');
   const problems=[];
   if(!gridCols.length)problems.push('체크박스 그리드 열을 못 찾았어요. 헤더가 "질문 [시간]" 형태인지 확인하세요.');
@@ -299,6 +306,23 @@ function build(){
   msg.textContent=problems.length?problems.join(' '):`${people.length}명, 슬롯 ${slots.length}개 인식됨`;
   renderRoster();
   store.set('cols',{ni,gi});
+}
+/* 이 응답이 "몇 년 몇 월 편성"인지 데이터에서 알아낸다.
+   슬롯 날짜("9월 26일")에는 연도가 없고 타임스탬프("2026/09/10")에는 있으므로 둘을 합친다.
+   접수한 달보다 이른 달이 나오면 해가 넘어간 것으로 본다 (12월에 걷어서 1월에 모이는 경우). */
+function detectPeriod(){
+  const md=slots.map(s=>{const m=s.col.match(/(\d{1,2})\s*월\s*(\d{1,2})/);return m?{mo:+m[1],d:+m[2]}:null}).filter(Boolean);
+  if(!md.length)return null;
+  let sub=null;
+  rows.forEach(r=>r.forEach(c=>{const m=String(c).match(/(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})/);
+    if(m){const v={y:+m[1],mo:+m[2]};if(!sub||v.y<sub.y||(v.y===sub.y&&v.mo<sub.mo))sub=v}}));
+  const now=new Date();
+  if(!sub)sub={y:now.getFullYear(),mo:now.getMonth()+1};
+  md.forEach(x=>{x.y=sub.y+(x.mo<sub.mo?1:0)});
+  md.sort((a,b)=>a.y-b.y||a.mo-b.mo||a.d-b.d);
+  const f=md[0],l=md[md.length-1];
+  return {period:`${f.y}-${String(f.mo).padStart(2,'0')}`,y:f.y,mo:f.mo,first:f,last:l,
+          span:(f.mo!==l.mo||f.d!==l.d)?`${f.mo}월 ${f.d}일 ~ ${l.mo}월 ${l.d}일`:`${f.mo}월 ${f.d}일`};
 }
 function dateKey(s){const m=s.match(/(\d+)\s*월\s*(\d+)/);return m?(+m[1])*100+(+m[2]):9999}
 function gradeIdx(g){const i=GRADE_ORDER.indexOf(g);return i<0?5:i}
@@ -460,7 +484,7 @@ function render(){
   const assigned=teams.reduce((s,t)=>s+t.members.length,0);
   const over=teams.filter(t=>t.members.length>maxM).length;
   const under=teams.filter(t=>t.members.length<minM).length;
-  $('#stats').innerHTML=[['조',teams.length],['배정',assigned],['미배정',pool.length,pool.length>0],['학년 겹침',dups],['시간 충돌',clashes,clashes>0],under?['정원 미달',under,true]:null,over?['정원 초과',over,true]:null].filter(Boolean)
+  $('#stats').innerHTML=[detected?['편성',`${detected.y}년 ${detected.mo}월`]:null,['조',teams.length],['배정',assigned],['미배정',pool.length,pool.length>0],['학년 겹침',dups],['시간 충돌',clashes,clashes>0],under?['정원 미달',under,true]:null,over?['정원 초과',over,true]:null].filter(Boolean)
     .map(([l,v,bad])=>`<div class="stat ${bad?'bad':''}"><b>${v}</b><span>${l}</span></div>`).join('');
   $('#legend').hidden=!editing;
   const hint=$('#hint');hint.hidden=!editing;
@@ -535,7 +559,9 @@ $('#xlsxBtn').onclick=async()=>{
   const add=(aoa,name,w)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=aoa[0].map((_,i)=>({wch:w(i)}));XLSX.utils.book_append_sheet(wb,ws,name)};
   add(summary,'조 요약',i=>i===1?18:i===0?6:16);add(long,'조별 명단',i=>i===1?18:10);add(pool,'미배정',i=>i===3?60:12);add(matrix,'가능 시간표',i=>i<3?10:13);
   const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
-  const d=new Date();const fn=`코잡스_친바_조편성_${d.getMonth()+1}월${d.getDate()}일.xlsx`;
+  const d=new Date();
+  const fn=detected?`코잡스_친바_${detected.y}년${detected.mo}월_조편성.xlsx`
+                   :`코잡스_친바_조편성_${d.getMonth()+1}월${d.getDate()}일.xlsx`;
   let dl=null;try{dl=await window.claude?.use?.('downloads')}catch(e){}
   if(dl){try{await dl.save({filename:fn,data:buf});toast('저장했어요')}catch(err){if(err&&err.code!=='declined')toast('저장하지 못했어요. "시트용 복사"를 써주세요.')}}
   else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=fn;a.click();}
@@ -682,7 +708,7 @@ async function shareBoot(){
   if(!share.who){const n=(prompt('이름을 알려주세요. 누가 언제 고쳤는지 표시하는 데만 씁니다.')||'').trim();
     share.who=n||'익명'; store.set('me',share.who)}
   $('#sharebar').hidden=false;
-  await shareLoad(h.get('m')||thisMonth());
+  await shareLoad(h.get('m')||(detected&&detected.period)||thisMonth());
   await shareBuildMonths();
   $('#sharePeriod').onchange=async e=>{await shareLoad(e.target.value)};
   $('#shareReload').onclick=()=>shareLoad(share.period);

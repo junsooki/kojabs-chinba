@@ -15,95 +15,110 @@
   --ok:#1D8A4C; --ok-bg:#E3F3E8; --rec:#0B6B36; --rec-bg:#BFE6CC;
   --no:#8A4634; --no-bg:#EBDFD8; --warn:#9A6A00; --warn-bg:#FBF0CF;
   --g1:#E0913A; --g2:#3B8FD9; --g3:#8A5BD1; --g4:#2BA37A; --g5:#D1487A; --g6:#7C8580;
-  --shadow:0 1px 0 rgba(20,30,25,.04),0 6px 18px -10px rgba(20,30,25,.25);
+  --r-sm:8px; --r-md:12px; --r-lg:16px;
+  --shadow:0 1px 2px rgba(20,30,25,.05),0 1px 1px rgba(20,30,25,.02);
+  --shadow-lg:0 1px 0 rgba(20,30,25,.03),0 10px 28px -16px rgba(20,30,25,.32);
+  --accent-shadow:0 1px 2px rgba(200,68,58,.22),0 5px 14px -7px rgba(200,68,58,.45);
   color-scheme:light;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:14px;line-height:1.5}
-.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
-h1{font-family:"Do Hyeon","IBM Plex Sans KR",sans-serif;font-weight:400;font-size:34px;line-height:1;margin:0;letter-spacing:.01em}
-h1 small{display:block;font-family:"IBM Plex Sans KR",sans-serif;font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:0}
-.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px}
-.tabs button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer}
+body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 72px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px}
+h1{font-family:"Do Hyeon","IBM Plex Sans KR",sans-serif;font-weight:400;font-size:36px;line-height:1;margin:0;letter-spacing:.01em}
+h1 small{display:block;font-family:"IBM Plex Sans KR",sans-serif;font-size:13px;line-height:1.5;font-weight:400;color:var(--muted);margin-top:8px;letter-spacing:0}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:var(--r-md);border:1px solid var(--line)}
+.tabs button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:7px 15px;border-radius:7px;cursor:pointer;transition:color .15s,background .15s}
+.tabs button:hover{color:var(--ink)}
 .tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 button,select,input,textarea{font:inherit;color:inherit}
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 15px;border-radius:var(--r-sm);font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:var(--shadow);transition:border-color .15s,background .15s,transform .06s}
 .btn:hover{border-color:var(--muted)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);box-shadow:var(--accent-shadow)}
+.btn.primary:hover{filter:brightness(1.07)}
 .btn.on{background:var(--ok-bg);border-color:var(--ok);color:var(--rec)}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
-.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-lg)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
 @media (max-width:860px){.grid2{grid-template-columns:1fr}}
-.label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
-h2{font-size:17px;margin:0 0 4px}
-p.help{color:var(--muted);margin:0 0 12px;max-width:62ch}
-textarea{width:100%;min-height:180px;border:1px solid var(--line);background:var(--sunk);border-radius:8px;padding:10px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;resize:vertical}
+.label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+h2{font-size:17px;font-weight:700;letter-spacing:-.005em;margin:0 0 5px}
+p.help{color:var(--muted);margin:0 0 12px;max-width:62ch;font-size:13px}
+textarea{width:100%;min-height:180px;border:1px solid var(--line);background:var(--sunk);border-radius:var(--r-sm);padding:12px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;line-height:1.6;resize:vertical;transition:border-color .15s}
+textarea:hover{border-color:var(--muted)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
-.field input,.field select{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:6px 8px;font-weight:500;color:var(--ink);min-width:0}
-.field input[type=number]{width:90px}
-.stack{display:flex;flex-direction:column;gap:14px}
-.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--sunk);color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.03em}
+.field input,.field select{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:7px 9px;font-size:14px;font-weight:500;letter-spacing:0;color:var(--ink);min-width:0;transition:border-color .15s}
+.field input:hover,.field select:hover{border-color:var(--muted)}
+.field input[type=number]{width:92px;font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:16px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:99px;background:var(--sunk);color:var(--muted)}
 .tag.example{background:var(--warn-bg);color:var(--warn);font-weight:600}
-.tablewrap{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:8px}
+.tablewrap{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:var(--r-md)}
 table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{position:sticky;top:0;background:var(--sunk);font-size:12px;color:var(--muted);z-index:1}
+th,td{padding:7px 11px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--sunk);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--sunk)}
 td.num{font-variant-numeric:tabular-nums;text-align:right}
 .gdot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
 .slotlist{display:flex;flex-wrap:wrap;gap:6px}
 .slotlist .tag b{color:var(--ink);font-variant-numeric:tabular-nums}
-.msg{font-size:13px;padding:8px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn)}
+.msg{font-size:13px;padding:10px 13px;border-radius:var(--r-sm);background:var(--warn-bg);color:var(--warn)}
 .msg.good{background:var(--ok-bg);color:var(--rec)}
 
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
 .stats{display:flex;flex-wrap:wrap;gap:8px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 12px;display:flex;gap:8px;align-items:baseline}
-.stat b{font-size:18px;font-variant-numeric:tabular-nums}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:7px 13px;display:flex;gap:8px;align-items:baseline;box-shadow:var(--shadow)}
+.stat b{font-size:19px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .stat span{font-size:12px;color:var(--muted)}
+.stat.bad{border-color:var(--no)}
 .stat.bad b{color:var(--no)}
-.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin:0 0 12px}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
-.hint{background:var(--accent-soft);color:var(--ink);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:0 0 14px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:5px;border:1px solid var(--line)}
+.hint{background:var(--accent-soft);color:var(--ink);padding:11px 15px;border-radius:var(--r-md);border-left:3px solid var(--accent);margin-bottom:14px;font-size:13px}
 
-.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;align-items:start}
-.team{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;transition:background .15s,border-color .15s}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;align-items:start}
+.team{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-lg);transition:background .15s,border-color .15s,box-shadow .15s}
 .team .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.team .tname{font-family:"Do Hyeon",sans-serif;font-size:20px;line-height:1}
-.team select{border:1px solid var(--line);background:var(--sunk);border-radius:6px;padding:4px 6px;font-size:12px;max-width:190px}
-.team .gradebar{display:flex;gap:3px;height:6px;border-radius:3px;overflow:hidden;background:var(--sunk)}
+.team .tname{font-family:"Do Hyeon",sans-serif;font-size:21px;line-height:1;flex:none;white-space:nowrap}
+.team .head .tag,.team .head .badge{flex:none;white-space:nowrap}
+.team select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r-sm);padding:5px 7px;font-size:12px;flex:1 1 auto;min-width:0;max-width:190px;transition:border-color .15s}
+.team select:hover{border-color:var(--muted)}
+.team .gradebar{display:flex;gap:3px;height:7px;border-radius:4px;overflow:hidden;background:var(--sunk)}
 .team .gradebar span{height:100%}
-.team .sub{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
-.chips{display:flex;flex-direction:column;gap:4px}
-.chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 4px 0 0;min-height:32px}
-.chip .pick{flex:1;display:flex;align-items:center;gap:8px;border:0;background:transparent;text-align:left;padding:5px 8px;cursor:default;min-width:0;border-radius:8px}
+.team .sub{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.chips{display:flex;flex-direction:column;gap:5px}
+.chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:0 4px 0 0;min-height:34px;transition:border-color .12s,background .12s}
+.chip .pick{flex:1;display:flex;align-items:center;gap:9px;border:0;background:transparent;text-align:left;padding:6px 9px;cursor:default;min-width:0;border-radius:var(--r-sm)}
 .editing .chip .pick{cursor:pointer}
+.editing .chip:hover{border-color:var(--muted)}
 .chip .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip .gr{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
 .chip.eb{background:var(--sunk)}
-.chip.eb .nm::after{content:"E-board";font-size:10px;font-weight:700;margin-left:6px;padding:1px 5px;border-radius:4px;background:var(--ink);color:var(--surface);vertical-align:1px}
+.chip.eb .nm::after{content:"E-board";font-size:10px;font-weight:700;margin-left:7px;padding:1px 6px;border-radius:5px;background:var(--ink);color:var(--surface);vertical-align:1px;letter-spacing:.02em}
 .chip.clash{border-color:var(--no);background:var(--no-bg)}
 .chip.clash .gr::before{content:"시간 X · ";color:var(--no);font-weight:700}
 .chip.sel{outline:2.5px solid var(--accent);outline-offset:1px}
-.chip .swap{border:1px solid var(--ok);background:var(--ok-bg);color:var(--rec);border-radius:6px;font-size:12px;font-weight:700;padding:2px 8px;cursor:pointer}
+.chip .swap{border:1px solid var(--ok);background:var(--ok-bg);color:var(--rec);border-radius:6px;font-size:12px;font-weight:700;padding:3px 9px;cursor:pointer;transition:filter .12s}
+.chip .swap:hover{filter:brightness(.96)}
 .chip .swap.rec{background:var(--rec);color:var(--surface);border-color:var(--rec)}
-.empty{font-size:12px;color:var(--muted);padding:6px 8px;border:1px dashed var(--line);border-radius:8px}
-.move{display:none;border:1.5px dashed currentColor;background:transparent;border-radius:8px;padding:6px;font-weight:700;cursor:pointer}
+.empty{font-size:12px;color:var(--muted);padding:7px 9px;border:1px dashed var(--line);border-radius:var(--r-sm)}
+.move{display:none;border:1.5px dashed currentColor;background:transparent;border-radius:var(--r-sm);padding:8px;font-weight:700;cursor:pointer}
 .team.t-rec{background:var(--rec-bg);border-color:var(--rec)}
 .team.t-ok{background:var(--ok-bg);border-color:var(--ok)}
 .team.t-warn{background:var(--warn-bg);border-color:var(--warn)}
-.team.t-no{opacity:.55}
+.team.t-no{opacity:.5}
 .team.t-rec .move{display:block;color:var(--rec)}
 .team.t-ok .move{display:block;color:var(--ok)}
 .team.t-warn .move{display:block;color:var(--warn)}
-.team.t-cur{border-color:var(--accent)}
-.team.pool{background:var(--sunk);border-style:dashed}
-.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--rec);color:var(--surface)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:9px 16px;border-radius:8px;font-weight:600;font-size:13px;z-index:10}
-@media (prefers-reduced-motion:reduce){.team{transition:none}}
+.team.t-cur{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.team.pool{background:var(--sunk);border-style:dashed;box-shadow:none}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--rec);color:var(--surface);letter-spacing:.02em}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:var(--r-md);font-weight:600;font-size:13px;z-index:10;box-shadow:0 8px 24px -8px rgba(20,30,25,.5)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -132,7 +147,8 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
         <label class="field">학년 열<select id="colGrade"></select></label>
       </div>
       <div class="row">
-        <label class="field">팀 총 인원 (E-board 포함)<input id="teamSize" type="number" min="3" max="12" value="5"></label>
+        <label class="field">최소 인원 (E-board 포함)<input id="teamMin" type="number" min="2" max="12" value="4"></label>
+        <label class="field">최대 인원<input id="teamMax" type="number" min="2" max="12" value="6"></label>
         <label class="field">E-board 1명당 최대 팀<input id="ebMax" type="number" min="1" max="10" value="1"></label>
         <label class="field">시도 횟수<input id="iters" type="number" min="20" max="5000" step="50" value="600"></label>
       </div>
@@ -281,15 +297,23 @@ function renderRoster(){
 }
 
 /* ---------- solver ---------- */
-const S=()=>Math.max(2,(+$('#teamSize').value||5)-(people.some(p=>p.eboard)?1:0));
+const EBSEAT=()=>(people.some(p=>p.eboard)?1:0);
+const SMIN=()=>Math.max(1,(+$('#teamMin').value||4)-EBSEAT());
+const SMAX=()=>Math.max(SMIN(),(+$('#teamMax').value||6)-EBSEAT());
 function dupCost(ids){const c={};let d=0;ids.forEach(id=>{const g=P(id).grade;d+=(c[g]||0);c[g]=(c[g]||0)+1});return d}
 let pIndex=new Map();const P=id=>pIndex.get(id);
 function solve(){
   pIndex=new Map(people.map(p=>[p.id,p]));
-  const size=S(),ebMax=Math.max(1,+$('#ebMax').value||1),iters=Math.max(20,+$('#iters').value||600);
+  const minM=SMIN(),maxM=SMAX(),avgM=(minM+maxM)/2;
+  const ebMax=Math.max(1,+$('#ebMax').value||1),iters=Math.max(20,+$('#iters').value||600);
   const E=people.filter(p=>p.eboard),M=people.filter(p=>!p.eboard);
-  let T=Math.max(1,Math.ceil(M.length/size));
+  // aim for the middle of [min,max]; never fewer teams than it takes to seat everyone,
+  // and never so many that teams cannot reach the minimum
+  const needT=Math.ceil(M.length/maxM),fitT=Math.max(1,Math.floor(M.length/minM));
+  let T=Math.max(1,Math.round(M.length/avgM));
+  T=Math.min(Math.max(T,needT),Math.max(needT,fitT));
   if(E.length)T=Math.min(T,E.length*ebMax);
+  T=Math.max(1,T);
   if(!M.length||!slots.length){teams=[];return}
   const demand={};slots.forEach(s=>demand[s.id]=M.filter(p=>p.avail.has(s.id)).length);
   let best=null,bestScore=Infinity;
@@ -305,19 +329,19 @@ function solve(){
       }else slots.forEach(s=>cands.push({e:null,s:s.id}));
       if(!cands.length)break;
       let pick=null,pw=-1;
-      cands.forEach(c=>{const left=demand[c.s]-(atSlot[c.s]||0)*size;const w=Math.pow(Math.max(.3,left),2)*Math.random();if(w>pw){pw=w;pick=c}});
+      cands.forEach(c=>{const left=demand[c.s]-(atSlot[c.s]||0)*avgM;const w=Math.pow(Math.max(.3,left),2)*Math.random();if(w>pw){pw=w;pick=c}});
       ts.push({slot:pick.s,eboard:pick.e,members:[]});
       atSlot[pick.s]=(atSlot[pick.s]||0)+1; if(pick.e)use.get(pick.e).push(pick.s);
     }
     const n=ts.length; if(!n)continue;
-    const cap=ts.map(()=>size);
+    const cap=ts.map(()=>maxM);
     const order=M.map(p=>({p,k:ts.filter(t=>p.avail.has(t.slot)).length+Math.random()*.9})).sort((a,b)=>a.k-b.k).map(x=>x.p);
     const pool=[];
     order.forEach(p=>{
       let bi=-1,bc=Infinity;
       ts.forEach((t,i)=>{if(t.members.length>=cap[i]||!p.avail.has(t.slot))return;
         const same=t.members.filter(id=>P(id).grade===p.grade).length;
-        const c=same*10+t.members.length/size+Math.random()*.6; if(c<bc){bc=c;bi=i}});
+        const c=same*10+(t.members.length<minM?-4:0)+t.members.length/maxM+Math.random()*.6; if(c<bc){bc=c;bi=i}});
       if(bi<0)pool.push(p.id);else ts[bi].members.push(p.id);
     });
     // repair: push someone out to make room
@@ -342,7 +366,7 @@ function solve(){
     const dups=ts.reduce((s,t)=>s+dupCost(t.members),0);
     const sizes=ts.map(t=>t.members.length),mean=sizes.reduce((a,b)=>a+b,0)/n;
     const spread=sizes.reduce((s,v)=>s+(v-mean)**2,0);
-    const small=ts.filter(t=>t.members.length<size-1).length;
+    const small=ts.filter(t=>t.members.length<minM).length;
     const score=pool.length*1000+small*200+dups*10+spread;
     if(score<bestScore){bestScore=score;best=ts.map(t=>({...t,members:[...t.members]}))}
   }
@@ -367,7 +391,7 @@ function status(ti){ // ti: team index or -1 pool
   }
   if(!p.avail.has(t.slot))return 't-no';
   const has=t.members.some(id=>P(id).grade===p.grade);
-  return (!has&&t.members.length<S())?'t-rec':'t-ok';
+  return (!has&&t.members.length<SMAX())?'t-rec':'t-ok';
 }
 function canSwap(ti,qid){
   if(!sel||!editing)return 0;const p=P(sel.id),q=P(qid);
@@ -393,7 +417,7 @@ function chip(id,ti,isEb){
 function gradebar(ids){const c={};ids.forEach(id=>{const g=P(id).grade;c[g]=(c[g]||0)+1});
   return `<div class="gradebar" title="${Object.entries(c).map(([g,n])=>g+' '+n).join(', ')}">${Object.entries(c).sort((a,b)=>gradeIdx(a[0])-gradeIdx(b[0])).map(([g,n])=>`<span style="flex:${n};background:${gcolor(g)}"></span>`).join('')}</div>`}
 function render(){
-  const size=S();
+  const minM=SMIN(),maxM=SMAX();
   const box=$('#teams');box.classList.toggle('editing',editing);
   let html=teams.map((t,i)=>{
     const st=status(i);
@@ -404,7 +428,7 @@ function render(){
         <select id="slot-${i}" data-slot="${i}" aria-label="${i+1}조 시간">${opts}</select></div>
       ${gradebar(t.members)}
       <div class="chips">${t.eboard?chip(t.eboard,i,true):'<div class="empty">E-board 없음</div>'}
-      ${t.members.map(m=>chip(m,i,false)).join('')}${t.members.length<size?`<div class="empty">빈자리 ${size-t.members.length}</div>`:''}</div>
+      ${t.members.map(m=>chip(m,i,false)).join('')}${t.members.length<minM?`<div class="empty">빈자리 ${minM-t.members.length}</div>`:''}</div>
       <button class="move" data-move="${i}">여기로 이동</button>
     </article>`}).join('');
   const pool=poolIds(),idle=idleEboards();
@@ -415,8 +439,9 @@ function render(){
   const clashes=teams.reduce((s,t)=>s+[t.eboard,...t.members].filter(id=>id&&!P(id).avail.has(t.slot)).length,0);
   const dups=teams.reduce((s,t)=>s+dupCost(t.members),0);
   const assigned=teams.reduce((s,t)=>s+t.members.length,0);
-  const over=teams.filter(t=>t.members.length>size).length;
-  $('#stats').innerHTML=[['조',teams.length],['배정',assigned],['미배정',pool.length,pool.length>0],['학년 겹침',dups],['시간 충돌',clashes,clashes>0],['정원 초과',over,over>0]]
+  const over=teams.filter(t=>t.members.length>maxM).length;
+  const under=teams.filter(t=>t.members.length<minM).length;
+  $('#stats').innerHTML=[['조',teams.length],['배정',assigned],['미배정',pool.length,pool.length>0],['학년 겹침',dups],['시간 충돌',clashes,clashes>0],under?['정원 미달',under,true]:null,over?['정원 초과',over,true]:null].filter(Boolean)
     .map(([l,v,bad])=>`<div class="stat ${bad?'bad':''}"><b>${v}</b><span>${l}</span></div>`).join('');
   $('#legend').hidden=!editing;
   const hint=$('#hint');hint.hidden=!editing;
@@ -464,13 +489,13 @@ let rawTimer;$('#raw').addEventListener('input',()=>{clearTimeout(rawTimer);rawT
 ['#colName','#colGrade'].forEach(s=>$(s).addEventListener('change',()=>{teams=[];build()}));
 $('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{$('#raw').value=rd.result;isExample=false;$('#exampleTag').hidden=true;store.set('raw',rd.result);teams=[];load(rd.result)};rd.readAsText(f)});
 $('#clearBtn').onclick=()=>{$('#raw').value='';store.set('raw','');$('#exampleTag').hidden=true;teams=[];load('')};
-['#teamSize','#ebMax','#iters'].forEach(s=>$(s).addEventListener('change',()=>store.set('settings2',{size:$('#teamSize').value,eb:$('#ebMax').value,it:$('#iters').value})));
+['#teamMin','#teamMax','#ebMax','#iters'].forEach(s=>$(s).addEventListener('change',()=>store.set('settings3',{min:$('#teamMin').value,max:$('#teamMax').value,eb:$('#ebMax').value,it:$('#iters').value})));
 function sanitize(){const ok=new Set(people.map(p=>p.id)),sl=new Set(slots.map(s=>s.id));
   teams=teams.filter(t=>sl.has(t.slot)).map(t=>({slot:t.slot,eboard:ok.has(t.eboard)&&P(t.eboard).eboard?t.eboard:null,members:t.members.filter(m=>ok.has(m)&&!P(m).eboard)}))}
 
 /* ---------- export ---------- */
 function tables(){
-  const size=S();const maxM=Math.max(size,...teams.map(t=>t.members.length));
+  const maxM=Math.max(SMAX(),...teams.map(t=>t.members.length));
   const summary=[['조','시간','E-board',...Array.from({length:maxM},(_,i)=>'멤버'+(i+1)),'학년 구성','시간 충돌']];
   const long=[['조','시간','역할','이름','학년','해당 시간 가능']];
   teams.forEach((t,i)=>{
@@ -504,7 +529,7 @@ $('#copyBtn').onclick=async()=>{
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2200)}
 
 /* ---------- boot ---------- */
-const st=store.get('settings2',null);if(st){$('#teamSize').value=st.size;$('#ebMax').value=st.eb;$('#iters').value=st.it}
+const st=store.get('settings3',null);if(st){$('#teamMin').value=st.min;$('#teamMax').value=st.max;$('#ebMax').value=st.eb;$('#iters').value=st.it}
 let raw=store.get('raw','');
 if(!raw){const ex=exampleCSV();raw=ex.csv;isExample=true;if(!ebNames.size){ex.eb.forEach(n=>ebNames.add(n))}}
 $('#exampleTag').hidden=!isExample;$('#raw').value=raw;load(raw);

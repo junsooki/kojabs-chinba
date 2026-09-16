@@ -69,6 +69,15 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
 .msg{font-size:13px;padding:10px 13px;border-radius:var(--r-sm);background:var(--warn-bg);color:var(--warn)}
 .msg.good{background:var(--ok-bg);color:var(--rec)}
 
+.sharebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 13px;margin-bottom:18px;box-shadow:var(--shadow);font-size:13px}
+.sharebar .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.sharebar.off .dot{background:var(--no)}
+.sharebar select{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r-sm);padding:5px 8px;font-size:13px;font-weight:600}
+.sharebar .btn{padding:5px 10px;font-size:12px}
+.sharebar .btn.on{background:var(--rec);border-color:var(--rec);color:var(--surface)}
+#shareState{font-weight:600}
+.sharebar .who{color:var(--muted);margin-left:auto;white-space:nowrap}
+
 .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
 .stats{display:flex;flex-wrap:wrap;gap:8px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:7px 13px;display:flex;gap:8px;align-items:baseline;box-shadow:var(--shadow)}
@@ -131,6 +140,16 @@ td.num{font-variant-numeric:tabular-nums;text-align:right}
       <button id="tab-board" role="tab" aria-selected="false">2 · 조 편성</button>
     </div>
   </header>
+
+  <div id="sharebar" class="sharebar" hidden>
+    <span class="dot"></span>
+    <select id="sharePeriod" aria-label="달 선택"></select>
+    <button class="btn" id="shareNew">다른 달</button>
+    <button class="btn" id="shareReload">불러오기</button>
+    <button class="btn" id="shareLock">이 달 확정</button>
+    <span id="shareState"></span>
+    <span id="shareWho" class="who"></span>
+  </div>
 
   <section id="view-data" class="grid2">
     <div class="panel stack">
@@ -449,7 +468,7 @@ function render(){
     :`${P(sel.id).name} 선택됨. 초록 조의 "여기로 이동" 또는 ⇄ 버튼으로 맞교환. 다시 누르면 선택 해제.`;
   saveState();
 }
-function saveState(){store.set('teams',teams.map(t=>({slot:t.slot,eboard:t.eboard,members:t.members})));}
+function saveState(){store.set('teams',teams.map(t=>({slot:t.slot,eboard:t.eboard,members:t.members})));shareTouch();}
 
 /* ---------- actions ---------- */
 function move(target){
@@ -476,7 +495,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{
   if(e.target.dataset.slot!=null){teams[+e.target.dataset.slot].slot=e.target.value;render()}
-  if(e.target.dataset.eb!=null){const id=e.target.dataset.eb;e.target.checked?ebNames.add(id):ebNames.delete(id);store.set('eb',[...ebNames]);const p=people.find(x=>x.id===id);if(p)p.eboard=e.target.checked;renderRoster()}
+  if(e.target.dataset.eb!=null){const id=e.target.dataset.eb;e.target.checked?ebNames.add(id):ebNames.delete(id);store.set('eb',[...ebNames]);const p=people.find(x=>x.id===id);if(p)p.eboard=e.target.checked;renderRoster();shareTouch()}
 });
 function showTab(board){$('#view-data').hidden=board;$('#view-board').hidden=!board;$('#tab-data').setAttribute('aria-selected',!board);$('#tab-board').setAttribute('aria-selected',board)}
 $('#tab-data').onclick=()=>showTab(false);
@@ -485,11 +504,11 @@ $('#goBtn').onclick=()=>{solve();sel=null;showTab(true);render();toast('랜덤 �
 $('#shuffleBtn').onclick=()=>{if(editing&&!confirmReset())return;solve();sel=null;render();toast('다시 배정했어요')};
 function confirmReset(){const b=$('#shuffleBtn');if(b.dataset.armed){delete b.dataset.armed;b.textContent='랜덤 배정';return true}b.dataset.armed=1;b.textContent='수정 내용 버리고 다시?';setTimeout(()=>{delete b.dataset.armed;b.textContent='랜덤 배정'},3000);return false}
 $('#editBtn').onclick=()=>{editing=!editing;sel=null;const b=$('#editBtn');b.classList.toggle('on',editing);b.setAttribute('aria-pressed',editing);b.textContent=editing?'편집 끝내기':'편집 모드';render()};
-let rawTimer;$('#raw').addEventListener('input',()=>{clearTimeout(rawTimer);rawTimer=setTimeout(()=>{isExample=false;$('#exampleTag').hidden=true;store.set('raw',$('#raw').value);teams=[];load($('#raw').value)},300)});
+let rawTimer;$('#raw').addEventListener('input',()=>{clearTimeout(rawTimer);rawTimer=setTimeout(()=>{isExample=false;$('#exampleTag').hidden=true;store.set('raw',$('#raw').value);teams=[];load($('#raw').value);shareTouch()},300)});
 ['#colName','#colGrade'].forEach(s=>$(s).addEventListener('change',()=>{teams=[];build()}));
 $('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{$('#raw').value=rd.result;isExample=false;$('#exampleTag').hidden=true;store.set('raw',rd.result);teams=[];load(rd.result)};rd.readAsText(f)});
 $('#clearBtn').onclick=()=>{$('#raw').value='';store.set('raw','');$('#exampleTag').hidden=true;teams=[];load('')};
-['#teamMin','#teamMax','#ebMax','#iters'].forEach(s=>$(s).addEventListener('change',()=>store.set('settings3',{min:$('#teamMin').value,max:$('#teamMax').value,eb:$('#ebMax').value,it:$('#iters').value})));
+['#teamMin','#teamMax','#ebMax','#iters'].forEach(s=>$(s).addEventListener('change',()=>{store.set('settings3',{min:$('#teamMin').value,max:$('#teamMax').value,eb:$('#ebMax').value,it:$('#iters').value});shareTouch()}));
 function sanitize(){const ok=new Set(people.map(p=>p.id)),sl=new Set(slots.map(s=>s.id));
   teams=teams.filter(t=>sl.has(t.slot)).map(t=>({slot:t.slot,eboard:ok.has(t.eboard)&&P(t.eboard).eboard?t.eboard:null,members:t.members.filter(m=>ok.has(m)&&!P(m).eboard)}))}
 
@@ -528,6 +547,155 @@ $('#copyBtn').onclick=async()=>{
 };
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2200)}
 
+/* ---------- 공유 보드 (Supabase) ----------
+   SB_ANON 이 비어 있거나 주소에 #ws= 가 없으면 전부 꺼진 채로 동작한다.
+   그 경우 앱은 지금까지처럼 이 브라우저 안에서만 돌아간다. */
+const SB_URL='https://wttgrvrkpgfwtvscmfhy.supabase.co';
+const SB_ANON=''; // Settings › API 의 anon public key. 비우면 공유 기능 off
+
+const share={on:false,ws:'',period:'',rev:0,locked:false,by:'',at:null,
+             applying:false,dirty:false,timer:null,poll:null,who:store.get('me','')};
+
+async function rpc(fn,args){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',
+    headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON,'Content-Type':'application/json'},
+    body:JSON.stringify(args)});
+  const txt=await r.text();
+  if(!r.ok)throw new Error(`${fn} ${r.status}: ${txt.slice(0,200)}`);
+  return txt?JSON.parse(txt):null;
+}
+
+function thisMonth(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function periodLabel(p){const[m,y]=[p.slice(5),p.slice(0,4)];return `${y}년 ${+m}월`}
+
+/* 지금 상태를 그대로 한 덩어리로 */
+function snapshot(){return{
+  raw:$('#raw').value, eb:[...ebNames],
+  teams:teams.map(t=>({slot:t.slot,eboard:t.eboard,members:t.members})),
+  settings:{min:$('#teamMin').value,max:$('#teamMax').value,eb:$('#ebMax').value,it:$('#iters').value},
+  cols:{ni:$('#colName').value,gi:$('#colGrade').value}}}
+
+/* 남이 저장한 걸 내 화면에 반영 */
+function applySnapshot(d){
+  share.applying=true;
+  try{
+    if(d.settings){$('#teamMin').value=d.settings.min;$('#teamMax').value=d.settings.max;
+                   $('#ebMax').value=d.settings.eb;$('#iters').value=d.settings.it}
+    ebNames=new Set(d.eb||[]);
+    $('#raw').value=d.raw||''; isExample=false; $('#exampleTag').hidden=true;
+    load(d.raw||'');
+    if(d.cols){ // 열 선택은 load() 가 option 을 다시 그린 뒤에야 먹으므로 한 번 더 돌린다
+      let ch=false;
+      if(d.cols.ni!=null&&$('#colName').value!==String(d.cols.ni)){$('#colName').value=d.cols.ni;ch=true}
+      if(d.cols.gi!=null&&$('#colGrade').value!==String(d.cols.gi)){$('#colGrade').value=d.cols.gi;ch=true}
+      if(ch)load(d.raw||'',true);
+    }
+    pIndex=new Map(people.map(p=>[p.id,p]));
+    teams=(d.teams||[]).map(t=>({slot:t.slot,eboard:t.eboard,members:[...(t.members||[])]}));
+    sanitize(); sel=null; render(); shareSig=JSON.stringify(snapshot());
+  }finally{share.applying=false}
+}
+
+function shareStatus(text,bad){
+  const b=$('#sharebar'); if(!b)return;
+  b.classList.toggle('off',!!bad);
+  $('#shareState').textContent=text;
+}
+function ago(ts){if(!ts)return'';const s=(Date.now()-new Date(ts))/1000;
+  return s<60?'방금':s<3600?`${Math.floor(s/60)}분 전`:s<86400?`${Math.floor(s/3600)}시간 전`:`${Math.floor(s/86400)}일 전`}
+function shareMeta(){
+  $('#shareWho').textContent=share.by?`마지막 저장: ${share.by} · ${ago(share.at)}`:'';
+  $('#shareLock').textContent=share.locked?'확정 해제':'이 달 확정';
+  $('#shareLock').classList.toggle('on',share.locked);
+}
+
+/* 저장 (낙관적 잠금) */
+async function sharePush(){
+  if(!share.on||share.applying||share.locked)return;
+  share.dirty=false; shareStatus('저장 중…');
+  try{
+    const [r]=await rpc('board_save',{ws:share.ws,p:share.period,body:snapshot(),who:share.who||'익명',base_rev:share.rev});
+    if(r.ok){share.rev=r.rev;share.by=share.who||'익명';share.at=new Date().toISOString();shareStatus('저장됨');shareMeta()}
+    else if(r.locked){share.locked=true;shareStatus('확정된 달이라 저장 안 됨',true);shareMeta()}
+    else if(r.conflict){shareStatus('충돌 — 다른 사람이 먼저 저장했어요',true);
+      toast('다른 사람이 먼저 저장했어요. 불러오기를 눌러 최신본을 받으세요.')}
+  }catch(e){shareStatus('저장 실패',true);console.error(e)}
+}
+let shareSig='';
+function shareTouch(){ // 상태가 바뀔 때마다 호출. 내용이 실제로 달라졌을 때만 저장한다
+  if(!share.on||share.applying||share.locked)return;
+  const sig=JSON.stringify(snapshot()); if(sig===shareSig)return; shareSig=sig;
+  share.dirty=true; shareStatus('변경됨…');
+  clearTimeout(share.timer); share.timer=setTimeout(sharePush,1200);
+}
+
+async function shareLoad(period){
+  share.period=period; location.hash=`ws=${share.ws}&m=${period}`;
+  shareStatus('불러오는 중…');
+  try{
+    const rows=await rpc('board_get',{ws:share.ws,p:period});
+    if(rows&&rows.length){const d=rows[0];
+      share.rev=d.rev;share.locked=d.locked;share.by=d.updated_by;share.at=d.updated_at;
+      applySnapshot(d.payload||{}); shareStatus(d.locked?'확정됨 (읽기 전용)':'저장됨');
+    }else{ // 아직 없는 달 → 지금 화면을 그 달의 첫 저장으로
+      share.rev=0;share.locked=false;share.by='';share.at=null;
+      shareStatus('새 달'); await sharePush();
+    }
+    shareMeta();
+  }catch(e){shareStatus('불러오기 실패',true);console.error(e)}
+}
+
+async function sharePollTick(){
+  if(!share.on||document.hidden||share.dirty)return;
+  try{
+    const rows=await rpc('board_rev',{ws:share.ws,p:share.period});
+    if(!rows||!rows.length)return;
+    const r=rows[0];
+    if(r.locked!==share.locked){share.locked=r.locked;shareMeta()}
+    if(r.rev!==share.rev){
+      share.by=r.updated_by;share.at=r.updated_at;
+      shareStatus(`${r.updated_by||'누군가'}가 수정했어요 — 불러오기`,true);shareMeta();
+    }
+  }catch(e){/* 네트워크 끊김은 조용히 무시, 다음 틱에 재시도 */}
+}
+
+async function shareBuildMonths(){
+  const sel=$('#sharePeriod');
+  let list=[];
+  try{list=(await rpc('board_list',{ws:share.ws})||[]).map(r=>r.period)}catch(e){}
+  const set=new Set(list); set.add(share.period); set.add(thisMonth());
+  const months=[...set].sort().reverse();
+  sel.innerHTML=months.map(p=>`<option value="${p}"${p===share.period?' selected':''}>${periodLabel(p)}</option>`).join('');
+}
+
+async function shareBoot(){
+  const h=new URLSearchParams(location.hash.slice(1));
+  const ws=h.get('ws');
+  if(!SB_ANON||!ws){$('#sharebar').hidden=true;return}
+  share.on=true; share.ws=ws;
+  if(!share.who){const n=(prompt('이름을 알려주세요. 누가 언제 고쳤는지 표시하는 데만 씁니다.')||'').trim();
+    share.who=n||'익명'; store.set('me',share.who)}
+  $('#sharebar').hidden=false;
+  await shareLoad(h.get('m')||thisMonth());
+  await shareBuildMonths();
+  $('#sharePeriod').onchange=async e=>{await shareLoad(e.target.value)};
+  $('#shareReload').onclick=()=>shareLoad(share.period);
+  $('#shareLock').onclick=async()=>{
+    if(!share.locked&&!confirm(`${periodLabel(share.period)} 편성을 확정할까요? 확정하면 아무도 수정할 수 없습니다.`))return;
+    try{share.locked=await rpc('board_lock',{ws:share.ws,p:share.period,want:!share.locked});
+      shareMeta();shareStatus(share.locked?'확정됨 (읽기 전용)':'저장됨');
+      toast(share.locked?'이 달을 확정했어요':'확정을 해제했어요');
+    }catch(e){toast('확정 상태를 바꾸지 못했어요')}
+  };
+  $('#shareNew').onclick=async()=>{
+    const v=(prompt('어느 달인가요? YYYY-MM 형식으로 적어주세요.',thisMonth())||'').trim();
+    if(!/^\d{4}-\d{2}$/.test(v)){if(v)toast('YYYY-MM 형식으로 적어주세요');return}
+    await shareLoad(v); await shareBuildMonths();
+  };
+  share.poll=setInterval(sharePollTick,5000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)sharePollTick()});
+}
+
 /* ---------- boot ---------- */
 const st=store.get('settings3',null);if(st){$('#teamMin').value=st.min;$('#teamMax').value=st.max;$('#ebMax').value=st.eb;$('#iters').value=st.it}
 let raw=store.get('raw','');
@@ -536,7 +704,7 @@ $('#exampleTag').hidden=!isExample;$('#raw').value=raw;load(raw);
 const saved=store.get('teams',null);
 pIndex=new Map(people.map(p=>[p.id,p]));
 if(saved&&saved.length&&!isExample){teams=saved;sanitize()}else solve();
-showTab(true);render();
+showTab(true);render();shareBoot();
 })();
 </script>
 </body>

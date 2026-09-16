@@ -528,9 +528,35 @@ $('#goBtn').onclick=()=>{solve();sel=null;showTab(true);render();toast('랜덤 �
 $('#shuffleBtn').onclick=()=>{if(editing&&!confirmReset())return;solve();sel=null;render();toast('다시 배정했어요')};
 function confirmReset(){const b=$('#shuffleBtn');if(b.dataset.armed){delete b.dataset.armed;b.textContent='랜덤 배정';return true}b.dataset.armed=1;b.textContent='수정 내용 버리고 다시?';setTimeout(()=>{delete b.dataset.armed;b.textContent='랜덤 배정'},3000);return false}
 $('#editBtn').onclick=()=>{editing=!editing;sel=null;const b=$('#editBtn');b.classList.toggle('on',editing);b.setAttribute('aria-pressed',editing);b.textContent=editing?'편집 끝내기':'편집 모드';render()};
-let rawTimer;$('#raw').addEventListener('input',()=>{clearTimeout(rawTimer);rawTimer=setTimeout(()=>{isExample=false;$('#exampleTag').hidden=true;store.set('raw',$('#raw').value);teams=[];load($('#raw').value);shareTouch()},300)});
+/* 응답을 고치거나 다시 붙여넣어도 이미 짜 둔 조는 그대로 둔다.
+   늦게 낸 사람은 미배정으로 들어오고, 응답에서 빠진 사람만 조에서 빠진다.
+   (예전엔 한 글자만 고쳐도 조가 전부 날아갔다) */
+function nameList(a){return a.slice(0,3).join(', ')+(a.length>3?` 외 ${a.length-3}명`:'')}
+function reloadKeeping(text){
+  const before=people.map(p=>p.name), hadTeams=teams.some(t=>t.members.length||t.eboard);
+  load(text);
+  pIndex=new Map(people.map(p=>[p.id,p]));
+  if(!hadTeams){teams=[];render();return}
+  const tBefore=teams.length;
+  sanitize();
+  const now=new Set(people.map(p=>p.name)), was=new Set(before);
+  const added=people.filter(p=>!was.has(p.name)).map(p=>p.name);
+  const gone=before.filter(n=>!now.has(n));
+  const dropped=tBefore-teams.length;
+  const note=[];
+  if(added.length)note.push(`${added.length}명 새로 들어왔어요 (${nameList(added)}) — 미배정에 있으니 편집 모드에서 넣어주세요`);
+  if(gone.length)note.push(`${gone.length}명이 응답에서 빠져 조에서 뺐어요 (${nameList(gone)})`);
+  if(dropped>0)note.push(`시간이 사라져서 ${dropped}개 조가 해제됐어요`);
+  if(note.length){
+    const m=$('#parseMsg'); m.hidden=false; m.className='msg';
+    m.textContent=(m.textContent?m.textContent+' · ':'')+note.join(' · ');
+    toast(note.join(' · '));
+  }
+  render();
+}
+let rawTimer;$('#raw').addEventListener('input',()=>{clearTimeout(rawTimer);rawTimer=setTimeout(()=>{isExample=false;$('#exampleTag').hidden=true;store.set('raw',$('#raw').value);reloadKeeping($('#raw').value);shareTouch()},300)});
 ['#colName','#colGrade'].forEach(s=>$(s).addEventListener('change',()=>{teams=[];build()}));
-$('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{$('#raw').value=rd.result;isExample=false;$('#exampleTag').hidden=true;store.set('raw',rd.result);teams=[];load(rd.result)};rd.readAsText(f)});
+$('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{$('#raw').value=rd.result;isExample=false;$('#exampleTag').hidden=true;store.set('raw',rd.result);reloadKeeping(rd.result)};rd.readAsText(f)});
 $('#clearBtn').onclick=()=>{$('#raw').value='';store.set('raw','');$('#exampleTag').hidden=true;teams=[];load('')};
 ['#teamMin','#teamMax','#ebMax','#iters'].forEach(s=>$(s).addEventListener('change',()=>{store.set('settings3',{min:$('#teamMin').value,max:$('#teamMax').value,eb:$('#ebMax').value,it:$('#iters').value});shareTouch()}));
 function sanitize(){const ok=new Set(people.map(p=>p.id)),sl=new Set(slots.map(s=>s.id));

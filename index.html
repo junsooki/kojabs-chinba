@@ -551,7 +551,7 @@ let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clea
    SB_ANON 이 비어 있거나 주소에 #ws= 가 없으면 전부 꺼진 채로 동작한다.
    그 경우 앱은 지금까지처럼 이 브라우저 안에서만 돌아간다. */
 const SB_URL='https://wttgrvrkpgfwtvscmfhy.supabase.co';
-const SB_ANON=''; // Settings › API 의 anon public key. 비우면 공유 기능 off
+const SB_ANON='sb_publishable_wcqkQNNsArITMbsj_xdn6g_5O7ckJKv'; // 공개용 키. 이것만으로는 아무것도 못 읽는다 (workspace key 필요)
 
 const share={on:false,ws:'',period:'',rev:0,locked:false,by:'',at:null,
              applying:false,dirty:false,timer:null,poll:null,who:store.get('me','')};
